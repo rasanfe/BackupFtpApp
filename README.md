@@ -67,3 +67,8 @@ SendMail --> Si queremos enviar un e-mail con los resultados (S/N)
 RestoreOrBackup --> Si queremos que haga la Copia o Restaure (S/N)
 
 CMD --> Se puede indicar la ruta de un archivo .bat para ejecutar algún comando adicional al final del todo.
+
+
+Para estar al tanto de lo que publico puedes seguir mi blog:
+
+https://rsrsystem.blogspot.com/
