@@ -1,0 +1,13 @@
+﻿$PBExportHeader$s_ftpdirlist.srs
+$PBExportComments$Structure used to build directory list
+global type s_ftpdirlist from structure
+	string		s_filename
+	string		s_altfilename
+	boolean		b_subdir
+	datetime		dt_creationtime
+	datetime		dt_lastaccesstime
+	datetime		dt_lastwritetime
+	double		db_filesize
+	unsignedlong		ul_attributes
+end type
+
