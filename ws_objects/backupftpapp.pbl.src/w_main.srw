@@ -57,10 +57,14 @@ String gs_ftp_FileMode //D/R (Download File o ReadFile)
 String is_sendMail // S/N (Notificar por e-mail)
 String is_RestoreOrBackup // S/N (Si o no a Copiar/restaurar Base de Datos)
 
+Constant String is_ClientMode = "C"
+Constant String is_ServerMode = "S"
 Constant String is_DownloadFile = "D"
 Constant String is_ReadFile = "R"
-Constant String is_RarFormat = "R"
 Constant String is_ZipFormat = "Z"
+Constant String is_7zipFormat = "7"
+Constant String is_GzipFormat = "G"
+Constant String is_TarFormat = "T"
 
 //Variables Ftp
 String is_ftp_pass, is_ftp_user, is_ftp_server, is_localDir, is_remoteDir
@@ -596,17 +600,18 @@ ib_ftp_ascii=gf_iif(ProfileString(gs_inifile, "FTP", "Ascii", "N")="N", FALSE, T
 is_ProgramMode= upper(ProfileString(gs_inifile, "OPTIONS", "ProgramMode", "S"))   //S=Servidor  C=Cliente
 is_compress= upper(ProfileString(gs_inifile, "OPTIONS", "Compress", "S"))  //S o N para comprimir/descomprimir
 is_compressFormat= upper(ProfileString(gs_inifile, "OPTIONS", "CompressFormat", "Z"))  //Zip por defecto, o Rar
+
 Choose Case is_compressFormat 
-	Case "7"
+	Case is_7zipFormat
 		ls_compressExtension = ".7zip"
-	Case "G"
+	Case is_GzipFormat
 		ls_compressExtension = ".gzip"
-	Case "T"
+	Case is_TarFormat
 		ls_compressExtension = ".tar"
 	Case else	
 		ls_compressExtension = ".zip"
 End Choose
-	
+
 gs_ftp_FileMode= upper(ProfileString(gs_inifile, "OPTIONS", "Ftp_FileMode", "D")) //Download por defecto
 is_ftp= upper(ProfileString(gs_inifile, "OPTIONS", "Ftp", "S"))
 is_RestoreOrBackup=upper(ProfileString(gs_inifile, "OPTIONS", "RestoreOrBackup", "S"))
@@ -619,7 +624,7 @@ is_sendMail=upper(ProfileString(gs_inifile, "OPTIONS", "SendMail", "S"))
 //************************************************************************************
 
 Try
-	IF 	is_ProgramMode="S" THEN //Servidor
+	IF 	is_ProgramMode = is_ServerMode THEN
 			if is_RestoreOrBackup="S" then 
 				for li_Database = 1 to li_TotalDataBases
 					ls_iniSection = "Database"+string(li_Database)
