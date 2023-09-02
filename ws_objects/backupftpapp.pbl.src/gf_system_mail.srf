@@ -29,7 +29,7 @@ ln_smtp.of_enable_tls(true)
 ln_smtp.of_Set_secure_protocol(0) 
 ln_smtp.of_Set_encoding(ls_charset)
 // set message properties
-ln_smtp.of_Set_Sender( "Control Riesgos Informa DB", ls_Userid)
+ln_smtp.of_Set_Sender( "BackupFtpApp", ls_Userid)
 ls_to_name[1]=as_emailToName
 ls_to_email[1]=as_emailTo
 ln_smtp.of_Set_Recipient(ls_to_name[], ls_to_email[])
