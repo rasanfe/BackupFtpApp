@@ -46,14 +46,15 @@ end prototypes
 
 type variables
 Integer ii_FileLog
-String is_mailLog
+String is_mailLog, is_compressExtension
  
 //Opciones Archivo Ini 
+Integer ii_TotalDataBases
 String is_ProgramMode // C/S (Cliente o Servidor)
 String is_compress // S/N ( Si o NO a comprimir/descomprimir) 
 String is_compressFormat //  Z/7/G/T (Zip, 7Zip, Gzip, Tar)
 String is_ftp // S/N (Subir o Bajar de Servidor FTP) 
-String gs_ftp_FileMode //D/R (Download File o ReadFile)
+String is_ftp_FileMode //D/R (Download File o ReadFile)
 String is_sendMail // S/N (Notificar por e-mail)
 String is_RestoreOrBackup // S/N (Si o no a Copiar/restaurar Base de Datos)
 
@@ -86,6 +87,8 @@ public subroutine wf_restore_database (string as_filename, string as_database) t
 public subroutine wf_upload (string as_filename) throws n_ex
 public subroutine wf_closeapp ()
 public subroutine wf_send_email (boolean ab_result) throws n_ex
+public subroutine wf_server_process () throws n_ex
+public subroutine wf_client_process () throws n_ex
 end prototypes
 
 event ue_percent_download;String ls_msg
@@ -164,7 +167,7 @@ DISCONNECT USING SQLCA;
 
 end subroutine
 
-public subroutine wf_download (string as_filename) throws n_ex;Integer li_rtn, li_ren
+public subroutine wf_download (string as_filename) throws n_ex;Integer li_rtn
 String ls_arc_remoto, ls_arch_local, ls_ext, ls_msg
 Boolean lb_result, lb_SetDir, lb_exist
 
@@ -207,7 +210,7 @@ IF lb_exist THEN
 	wf_log(ls_msg)
 END IF	
 
-IF gs_ftp_FileMode = is_DownloadFile THEN
+IF is_ftp_FileMode = is_DownloadFile THEN
 	lb_result = gn_ftp.of_Ftp_GetFile(ls_arc_remoto, ls_arch_local, ib_ftp_ascii)
 ELSE
 	lb_result = gn_ftp.of_Ftp_ReadFile(ls_arc_remoto, ls_arch_local, Handle(w_main), 1023 + 1)
@@ -388,7 +391,7 @@ DISCONNECT USING SQLCA;
 
 end subroutine
 
-public subroutine wf_upload (string as_filename) throws n_ex;integer li_rtn, li_ren
+public subroutine wf_upload (string as_filename) throws n_ex;integer li_rtn
 string ls_arc_remoto, ls_arch_local, ls_ext, ls_msg
 boolean lb_result, lb_SetDir, lb_exist
 
@@ -433,7 +436,7 @@ IF NOT lb_exist THEN
 	gf_throw(PopulateError(4, ls_msg))
 END IF	
 
-IF gs_ftp_FileMode = is_DownloadFile THEN
+IF is_ftp_FileMode = is_DownloadFile THEN
 	lb_result = gn_ftp.of_ftp_putfile(ls_arch_local, ls_arc_remoto, ib_ftp_ascii)
 ELSE
 	lb_result =gn_ftp.of_Ftp_WriteFile(ls_arc_remoto, ls_arch_local, Handle(w_main), 1023 + 2)
@@ -501,6 +504,86 @@ wf_log(ls_log)
 
 end subroutine
 
+public subroutine wf_server_process () throws n_ex;String ls_iniSection, ls_fileName, ls_CompressFileName, ls_dataBase
+Integer li_Database
+
+IF is_RestoreOrBackup="S" THEN
+	FOR li_Database = 1 TO ii_TotalDataBases
+		ls_iniSection = "Database"+string(li_Database)
+		ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
+		ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
+		wf_backup_database(ls_fileName, ls_dataBase)
+	NEXT
+END IF
+
+IF is_compress="S" THEN 
+	FOR li_Database = 1 TO ii_TotalDataBases
+		ls_iniSection = "Database"+string(li_Database)
+		ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
+		ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
+		ls_CompressFileName = gf_getfilenamewithoutextension(ls_fileName)+is_compressExtension
+		wf_compress(ls_fileName, ls_CompressFileName)
+	NEXT
+END IF
+
+IF is_ftp ="S"  THEN 
+	wf_connect_ftp(is_ftp_server, is_ftp_user, is_ftp_pass)
+	sleep(1)
+	FOR li_Database = 1 TO ii_TotalDataBases
+		ls_iniSection = "Database"+string(li_Database)
+		ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
+		ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
+		if is_compress="S" then 
+			ls_CompressFileName = gf_getfilenamewithoutextension(ls_fileName)+is_compressExtension
+			wf_upload(ls_CompressFileName)
+		else
+			wf_upload(ls_fileName)
+		end if	
+	NEXT
+	wf_disconnect_ftp()
+END IF
+end subroutine
+
+public subroutine wf_client_process () throws n_ex;String ls_iniSection, ls_fileName, ls_CompressFileName, ls_dataBase
+Integer li_Database
+
+IF is_ftp ="S" THEN
+	wf_connect_ftp(is_ftp_server, is_ftp_user, is_ftp_pass)
+	sleep(1)
+	FOR li_Database = 1 TO ii_TotalDataBases
+		ls_iniSection = "Database"+string(li_Database)
+		ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
+		ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
+		if is_compress="S" then 
+			ls_CompressFileName = gf_getfilenamewithoutextension(ls_fileName)+is_compressExtension
+			wf_download(ls_CompressFileName)
+		else
+			wf_download(ls_fileName)
+		end if	
+	NEXT
+	wf_disconnect_ftp()
+END IF
+
+IF is_compress="S" THEN 
+	FOR li_Database = 1 TO ii_TotalDataBases
+		ls_iniSection = "Database"+string(li_Database)
+		ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
+		ls_CompressFileName = gf_getfilenamewithoutextension(ls_fileName)+is_compressExtension
+		ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
+		wf_extract(ls_CompressFileName)
+	NEXT
+END IF	
+
+IF is_RestoreOrBackup="S" THEN
+	FOR li_Database = 1 TO ii_TotalDataBases
+		ls_iniSection = "Database"+string(li_Database)
+		ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
+		ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
+		wf_restore_database(ls_fileName, ls_dataBase)
+	NEXT
+END IF	
+end subroutine
+
 on w_main.create
 this.pb_confirmar=create pb_confirmar
 this.st_info=create st_info
@@ -528,9 +611,54 @@ destroy(this.st_platform)
 destroy(this.r_2)
 end on
 
-event open;is_localDir=gs_appdir
-Timer(1)
+event open;String ls_log
+
+is_localDir=gs_appdir
 wf_version()
+
+ii_FileLog = FileOpen(gs_appdir+"log.txt", LineMode!, Write!, LockWrite!, Append!)
+
+//[SETUP]
+ii_TotalDataBases = ProfileInt(gs_inifile, "SETUP", "Databases ", 0)
+
+IF ii_TotalDataBases = 0 THEN
+	ls_log= "No hay Bases de Datos Configuradas."
+	wf_log(ls_log)
+	wf_closeApp()
+	RETURN
+END IF	
+
+//[FTP]
+is_ftp_user = ProfileString(gs_inifile, "FTP", "Userid", "")
+is_ftp_pass =  gn_seg.of_decrypt( ProfileString(gs_inifile, "FTP", "Password", ""))
+is_ftp_server = ProfileString(gs_inifile, "FTP", "Server", "") 
+is_remoteDir=ProfileString(gs_inifile, "FTP", "InitialDirectory", "//")
+ib_ftp_pasv=gf_iif(ProfileString(gs_inifile, "FTP", "Pasive", "N")="N", FALSE, TRUE)
+ib_ftp_ascii=gf_iif(ProfileString(gs_inifile, "FTP", "Ascii", "N")="N", FALSE, TRUE)
+
+//[OPTIONS]
+is_ProgramMode= upper(ProfileString(gs_inifile, "OPTIONS", "ProgramMode", "S"))   //S=Servidor  C=Cliente
+is_compress= upper(ProfileString(gs_inifile, "OPTIONS", "Compress", "S"))  //S o N para comprimir/descomprimir
+is_compressFormat= upper(ProfileString(gs_inifile, "OPTIONS", "CompressFormat", "Z"))  //Zip por defecto, o Rar
+
+Choose Case is_compressFormat 
+	Case is_7zipFormat
+		is_compressExtension = ".7zip"
+	Case is_GzipFormat
+		is_compressExtension = ".gzip"
+	Case is_TarFormat
+		is_compressExtension = ".tar"
+	Case else	
+		is_compressExtension = ".zip"
+End Choose
+
+is_ftp_FileMode= upper(ProfileString(gs_inifile, "OPTIONS", "Ftp_FileMode", "D")) //Download por defecto
+is_ftp= upper(ProfileString(gs_inifile, "OPTIONS", "Ftp", "S"))
+is_RestoreOrBackup=upper(ProfileString(gs_inifile, "OPTIONS", "RestoreOrBackup", "S"))
+is_sendMail=upper(ProfileString(gs_inifile, "OPTIONS", "SendMail", "S"))
+
+Timer(1)
+
 
 
 
@@ -570,52 +698,7 @@ long textcolor = 16777215
 long backcolor = 33521664
 end type
 
-event clicked;String ls_comando, ls_log, ls_compressExtension, ls_iniSection
-Integer li_Database, li_TotalDataBases
-String ls_fileName, ls_CompressFileName, ls_dataBase
-
-ii_FileLog = FileOpen(gs_appdir+"log.txt", LineMode!, Write!, LockWrite!, Append!)
-
-//[SETUP]
-li_TotalDataBases = ProfileInt(gs_inifile, "SETUP", "Databases ", 0)
-
-IF li_TotalDataBases = 0 THEN
-	ls_log= "No hay Bases de Datos Configuradas."
-	wf_log(ls_log)
-	wf_closeApp()
-	RETURN
-END IF	
-
-
-//[FTP]
-is_ftp_user = ProfileString(gs_inifile, "FTP", "Userid", "")
-is_ftp_pass =  gn_seg.of_decrypt( ProfileString(gs_inifile, "FTP", "Password", ""))
-is_ftp_server = ProfileString(gs_inifile, "FTP", "Server", "") 
-is_remoteDir=ProfileString(gs_inifile, "FTP", "InitialDirectory", "//")
-ib_ftp_pasv=gf_iif(ProfileString(gs_inifile, "FTP", "Pasive", "N")="N", FALSE, TRUE)
-ib_ftp_ascii=gf_iif(ProfileString(gs_inifile, "FTP", "Ascii", "N")="N", FALSE, TRUE)
-
-
-//[OPTIONS]
-is_ProgramMode= upper(ProfileString(gs_inifile, "OPTIONS", "ProgramMode", "S"))   //S=Servidor  C=Cliente
-is_compress= upper(ProfileString(gs_inifile, "OPTIONS", "Compress", "S"))  //S o N para comprimir/descomprimir
-is_compressFormat= upper(ProfileString(gs_inifile, "OPTIONS", "CompressFormat", "Z"))  //Zip por defecto, o Rar
-
-Choose Case is_compressFormat 
-	Case is_7zipFormat
-		ls_compressExtension = ".7zip"
-	Case is_GzipFormat
-		ls_compressExtension = ".gzip"
-	Case is_TarFormat
-		ls_compressExtension = ".tar"
-	Case else	
-		ls_compressExtension = ".zip"
-End Choose
-
-gs_ftp_FileMode= upper(ProfileString(gs_inifile, "OPTIONS", "Ftp_FileMode", "D")) //Download por defecto
-is_ftp= upper(ProfileString(gs_inifile, "OPTIONS", "Ftp", "S"))
-is_RestoreOrBackup=upper(ProfileString(gs_inifile, "OPTIONS", "RestoreOrBackup", "S"))
-is_sendMail=upper(ProfileString(gs_inifile, "OPTIONS", "SendMail", "S"))
+event clicked;String ls_comando, ls_log
 
 
 //************************************************************************************
@@ -625,73 +708,9 @@ is_sendMail=upper(ProfileString(gs_inifile, "OPTIONS", "SendMail", "S"))
 
 Try
 	IF 	is_ProgramMode = is_ServerMode THEN
-			if is_RestoreOrBackup="S" then 
-				for li_Database = 1 to li_TotalDataBases
-					ls_iniSection = "Database"+string(li_Database)
-					ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
-					ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
-					wf_backup_database(ls_fileName, ls_dataBase)
-				next
-			end if	
-			if is_compress="S" then 
-				for li_Database = 1 to li_TotalDataBases
-					ls_iniSection = "Database"+string(li_Database)
-					ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
-					ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
-					ls_CompressFileName = gf_getfilenamewithoutextension(ls_fileName)+ls_compressExtension
-					wf_compress(ls_fileName, ls_CompressFileName)
-				next
-			end if
-			if is_ftp ="S"  then 
-				wf_connect_ftp(is_ftp_server, is_ftp_user, is_ftp_pass)
-				sleep(1)
-				for li_Database = 1 to li_TotalDataBases
-					ls_iniSection = "Database"+string(li_Database)
-					ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
-					ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
-					if is_compress="S" then 
-						ls_CompressFileName = gf_getfilenamewithoutextension(ls_fileName)+ls_compressExtension
-						wf_upload(ls_CompressFileName)
-					else
-						wf_upload(ls_fileName)
-					end if	
-				next
-				wf_disconnect_ftp()
-			end if	
-	  ELSE  // caso cliente
-		if is_ftp ="S" then
-			wf_connect_ftp(is_ftp_server, is_ftp_user, is_ftp_pass)
-			sleep(1)
-			for li_Database = 1 to li_TotalDataBases
-				ls_iniSection = "Database"+string(li_Database)
-				ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
-				ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
-				if is_compress="S" then 
-					ls_CompressFileName = gf_getfilenamewithoutextension(ls_fileName)+ls_compressExtension
-					wf_download(ls_CompressFileName)
-				else
-					wf_download(ls_fileName)
-				end if	
-			next
-			wf_disconnect_ftp()
-		end if
-		if is_compress="S" then 
-			for li_Database = 1 to li_TotalDataBases
-				ls_iniSection = "Database"+string(li_Database)
-				ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
-				ls_CompressFileName = gf_getfilenamewithoutextension(ls_fileName)+ls_compressExtension
-				ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
-				wf_extract(ls_CompressFileName)
-			next
-		end if	
-		if is_RestoreOrBackup="S" then
-			for li_Database = 1 to li_TotalDataBases
-				ls_iniSection = "Database"+string(li_Database)
-				ls_fileName = ProfileString(gs_inifile, ls_iniSection, "filename", "")
-				ls_dataBase = ProfileString(gs_inifile, ls_iniSection, "Database", "")
-				wf_restore_database(ls_fileName, ls_dataBase)
-			next
-		end if	
+		wf_server_process()
+	ELSE
+		wf_client_process()
 	END IF
 	
 	ls_comando=upper(ProfileString(gs_inifile, "OPTIONS", "CMD", ""))
@@ -709,7 +728,6 @@ Catch(n_ex ln_ex)
 	wf_log(ls_log)
 	IF is_sendMail="S" THEN wf_send_email(FALSE)
 End Try
-
 
 wf_closeApp()
 
