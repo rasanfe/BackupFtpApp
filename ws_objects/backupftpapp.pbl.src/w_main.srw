@@ -70,6 +70,7 @@ Constant String is_TarFormat = "T"
 //Variables Ftp
 String is_ftp_pass, is_ftp_user, is_ftp_server, is_localDir, is_remoteDir
 Boolean ib_ftp_pasv, ib_ftp_ascii
+Integer ii_ftp_port
 
 
 end variables
@@ -295,7 +296,7 @@ IF lb_sesion=FALSE THEN
 	gf_throw(PopulateError(1, ls_msg))
 END IF
 
-lb_connect=gn_ftp.of_Ftp_InternetConnect(as_server, as_user, as_pass, 21, ib_ftp_pasv)
+lb_connect=gn_ftp.of_Ftp_InternetConnect(as_server, as_user, as_pass, ii_ftp_port, ib_ftp_pasv)
 
 IF lb_connect=FALSE THEN
 	ls_msg  = "Error al conectarse al servidor FTP."
@@ -632,6 +633,7 @@ END IF
 is_ftp_user = ProfileString(gs_inifile, "FTP", "Userid", "")
 is_ftp_pass =  gn_seg.of_decrypt( ProfileString(gs_inifile, "FTP", "Password", ""))
 is_ftp_server = ProfileString(gs_inifile, "FTP", "Server", "") 
+ii_ftp_port = ProfileInt(gs_inifile, "FTP", "Port", 21) 
 is_remoteDir=ProfileString(gs_inifile, "FTP", "InitialDirectory", "//")
 ib_ftp_pasv=gf_iif(ProfileString(gs_inifile, "FTP", "Pasive", "N")="N", FALSE, TRUE)
 ib_ftp_ascii=gf_iif(ProfileString(gs_inifile, "FTP", "Ascii", "N")="N", FALSE, TRUE)
