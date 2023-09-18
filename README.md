@@ -39,6 +39,8 @@ name --> Nombre del Destinatario.
 
 Server --> Dirrección FTP
 
+Port ---> Puerto (Normalmente el 21)
+
 Userid --> Usuario cuenta FTP
 
 Password --> Clave Encriptada cuenta FTP
