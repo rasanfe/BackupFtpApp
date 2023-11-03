@@ -1,14 +1,14 @@
 ﻿$PBExportHeader$backupftpapp64_exe.srj
-EXE:backupftpapp.exe,,0,1,1,0,C:\Program Files (x86)\Appeon\Common\PowerBuilder\Runtime 22.1.0.2819
+EXE:backupftpapp.exe,,0,1,1,0,C:\Program Files (x86)\Appeon\Common\PowerBuilder\Runtime 22.1.0.2828
 CMP:0,0,0,3,0,0,1
 COM:RSRSYSTEM
 DES:Appeon Power Builder 2022 Product File 64Bits
 CPY:Ramón San Félix Ramón
 PRD:BackupFtpApp
-PVS:2022.2.2819.5
-PVN:2022,2,2819,5
-FVS:2022.2.2819.5
-FVN:2022,2,2819,5
+PVS:2022.2.2828.6
+PVN:2022,2,2828,6
+FVS:2022.2.2828.6
+FVN:2022,2,2828,6
 MAN:0,asInvoker,0
 PBD:backupftpapp.pbl,,1
 OBJ:C:\proyecto pw2022\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,gf_system_mail,f
