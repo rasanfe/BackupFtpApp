@@ -1,0 +1,37 @@
+﻿global type gf_GetFileNameWithoutExtension from function_object
+end type
+
+forward prototypes
+global function string gf_getfilenamewithoutextension (string as_sourcefile)
+end prototypes
+
+global function string gf_getfilenamewithoutextension (string as_sourcefile);// -----------------------------------------------------------------------------
+// SCRIPT:    gf_GetFileNameWithoutExtension(as_sourcefile)
+//
+// PURPOSE:    Retorna el nombre del archivo sin  la extensión.
+//			
+//	EJEMPLO si le pasas ejemplo.pdf  --> ejemplo
+//
+// ARGUMENTS:     as_sourcefile    --> Archivo sin ruta
+//						
+//
+// RETURN:     string ls_file--> Nombre de archivo limpio
+//
+// DATE          PROG/ID		DESCRIPTION OF CHANGE / REASON
+// ----------      --------		-----------------------------------------------------
+// 25/10/2017	Ramón		Initial coding
+// -----------------------------------------------------------------------------
+integer li_posPunto
+string ls_file
+
+ls_file=trim(as_sourcefile)
+
+IF pos(ls_file, ".") = 0 THEN RETURN ls_file
+
+li_posPunto=lastpos(ls_file, ".")
+
+ls_file = mid(ls_file, 0 ,  li_pospunto - 1)
+
+RETURN ls_file
+end function
+

@@ -1,0 +1,39 @@
+﻿global type gf_conectar from function_object
+end type
+
+forward prototypes
+global subroutine gf_conectar (string as_database) throws n_ex
+end prototypes
+
+global subroutine gf_conectar (string as_database) throws n_ex;//Variables por defecto:
+string ls_dbms,  ls_database,  ls_userid,  ls_dbpass,  ls_logid,  ls_logpass,  ls_server,  ls_dbparm,  ls_lock,  ls_autocommit
+
+ls_dbms			= "MSOLEDBSQL SQL Server"
+ls_logid			=  ProfileString(gs_iniFile, "SETUP", "LogID", "")
+ls_logpass		=  gn_seg.of_Decrypt(ProfileString(gs_iniFile, "SETUP", "LogPass", ""))
+ls_server			= ProfileString(gs_iniFile, "SETUP", "ServerName", "ntserver-3\sqlexpress")
+ls_lock			= "RU"
+ls_autocommit	= "False" 
+
+SQLCA.DBMS			= ls_dbms
+SQLCA.Database		= ""
+SQLCA.UserID			= ""
+SQLCA.DBPass			= ""
+SQLCA.LogID			= ls_logid
+SQLCA.LogPass			= ls_logpass
+SQLCA.ServerName	= ls_server	
+SQLCA.DBParm			= "Database='"+as_database+"',TrimSpaces=1,DateFormat='\''dd-mm-yyyy\''',DateTimeFormat='\''dd-mm-yyyy hh:mm:ss:fff\''',TimeFormat='hh:mm:ss:fff'"
+SQLCA.Lock				= ls_lock
+IF UPPER(ls_autocommit) <> "TRUE" THEN
+	SQLCA.AutoCommit	= False
+ELSE
+	SQLCA.AutoCommit	= true
+END IF
+
+CONNECT USING SQLCA;
+
+IF SQLCA.SQLCode <> 0 THEN
+	gf_throw(PopulateError(1, "Error conectando con Base de Datos."))
+END if	
+end subroutine
+

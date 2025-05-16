@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Project>
+  <Type Name="pb"/>
+  <Application Name="backupftpapp"/>
+  <Libraries AppEntry="backupftpapp.pbl">
+    <Library Path="backupftpapp.pbl"/>
+  </Libraries>
+</Project>
