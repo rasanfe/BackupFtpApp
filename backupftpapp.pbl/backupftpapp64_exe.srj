@@ -1,0 +1,26 @@
+﻿EXE:backupftpapp.exe,,0,1,1,0,C:\Program Files (x86)\Appeon\Common\PowerBuilder\Runtime 25.0.0.3711
+CMP:0,0,0,3,0,0,1
+COM:RSRSYSTEM
+DES:Appeon Power Builder 2025 Product File 64Bits
+CPY:Ramón San Félix Ramón
+PRD:BackupFtpApp
+PVS:2025.1.3711.11
+PVN:2025,1,3711,11
+FVS:2025.1.3711.11
+FVN:2025,1,3711,11
+MAN:0,asInvoker,0
+PBD:backupftpapp.pbl,,1
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,n_wininet,u
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,gf_getfilenamewithoutextension,f
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,n_cst_seguridad,u
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,n_cst_compressor,u
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,nvo_smtpclient,u
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,w_main,w
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,backupftpapp,a
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,gf_throw,f
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,n_ex,u
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,n_winsock,u
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,gf_conectar,f
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,gf_system_mail,f
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,s_ftpdirlist,s
+OBJ:C:\proyecto pw2025\Blog\PowerBuilder\BackupFtpApp\backupftpapp.pbl,gf_iif,f

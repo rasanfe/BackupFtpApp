@@ -1,0 +1,47 @@
+﻿global type gf_system_mail from function_object
+end type
+
+forward prototypes
+global subroutine gf_system_mail (string as_asunto, string as_mensaje, string as_emailtoname, string as_emailto) throws n_ex
+end prototypes
+
+global subroutine gf_system_mail (string as_asunto, string as_mensaje, string as_emailtoname, string as_emailto) throws n_ex;Integer li_rc
+String ls_errmsg
+nvo_smtpclient ln_smtp 
+String ls_charset
+String ls_to_name[], ls_to_email[]
+String ls_server, ls_userid, ls_password, ls_section
+string ls_result
+
+ls_Server = ProfileString(gs_inifile, "MAIL", "Server", "")
+ls_Userid = ProfileString(gs_inifile, "MAIL", "Userid", "")
+ls_Password = ProfileString(gs_inifile, "MAIL", "Password", "")
+ls_charset  ="utf-8"
+
+ln_smtp = CREATE nvo_smtpclient
+
+// set server settings
+ln_smtp.of_Set_Host(ls_server)
+ln_smtp.of_Set_login(ls_Userid , ls_password)
+ln_smtp.of_Set_Port(587)
+ln_smtp.of_enable_tls(true)
+ln_smtp.of_Set_secure_protocol(0) 
+ln_smtp.of_Set_encoding(ls_charset)
+// set message properties
+ln_smtp.of_Set_Sender( "BackupFtpApp", ls_Userid)
+ls_to_name[1]=as_emailToName
+ls_to_email[1]=as_emailTo
+ln_smtp.of_Set_Recipient(ls_to_name[], ls_to_email[])
+ln_smtp.of_Set_Subject(as_asunto)
+ln_smtp.of_Set_Message(as_mensaje, false)
+ln_smtp.of_Set_Priority(ln_smtp.ii_NormalPriority)
+					
+// send the email
+li_rc = ln_smtp.of_Send()
+		
+destroy ln_smtp	
+
+
+
+end subroutine
+
