@@ -361,11 +361,11 @@ end subroutine
 public subroutine wf_restore_database (string as_filename, string as_database) throws n_ex;String ls_sql, ls_msg
 Boolean lb_exist
 
-lb_exist = FileExists(as_filename)
-	
+lb_exist = FileExists(gs_appdir + as_filename)
+
 // Si no existe el archivo de backup aborto
 IF lb_exist=FALSE THEN
-	 ls_msg="Archivo de backup "+as_filename+" no existe, no se puede reataurar la base de datos "+as_database+"."
+	 ls_msg="Archivo de backup "+gs_appdir+as_filename+" no existe, no se puede restaurar la base de datos "+as_database+"."
 	 gf_throw(PopulateError(1, ls_msg))
 END IF	
 
