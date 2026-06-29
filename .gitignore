@@ -1,0 +1,6 @@
+# Config local con credenciales (usa setup_example.ini como plantilla)
+/setup.ini
+/setup_mio_no_git.ini
+
+# Regenerables PowerBuilder
+/*.pbl
