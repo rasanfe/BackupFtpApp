@@ -2,8 +2,11 @@
 /setup.ini
 /setup_mio_no_git.ini
 
-# Regenerables PowerBuilder
-/*.pbl
+# OJO: aqui NO va "/*.pbl". Este proyecto es PB 2025 en modo SOLUCION, donde los
+# .pbl son CARPETAS con los fuentes dentro (no las librerias binarias del modo
+# clasico). Ignorarlas no saca del repo lo ya versionado, pero hace que un fuente
+# NUEVO dentro de una .pbl no lo anada nunca `git add -A`: se pierde en silencio.
+# Quitado 2026-07-17.
 
 # Regenerables de PowerBuilder (no versionar) - anadido por mantenimiento
 .pb/
